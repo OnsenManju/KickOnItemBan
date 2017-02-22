@@ -19,7 +19,7 @@ namespace KickOnItemBan
 
 		public override Version Version
 		{
-			get { return new Version(1, 0, 0); }
+			get { return new Version(1, 1, 0); }
 		}
 
 		public override string Author
@@ -51,9 +51,13 @@ namespace KickOnItemBan
 			base.Dispose(disposing);
 		}
 
-		// The following code is borrowed from 'TShock/TShockAPI/TShock.cs'.
+		// Some part of the following code is borrowed from 'TShock/TShockAPI/TShock.cs'.
 
 		private DateTime LastCheck = DateTime.UtcNow;
+
+		private Dictionary<string, int> TimeLeft = new Dictionary<string, int>();
+
+		private int MaxTimeLeft = 10;
 
 		private void OnUpdate(EventArgs args)
 		{
@@ -72,7 +76,27 @@ namespace KickOnItemBan
 				{
 					if (TShock.Itembans.ItemIsBanned(player.TPlayer.inventory[player.TPlayer.selectedItem].name, player))
 					{
-						TShock.Utils.Kick(player, string.Format("Holding banned item: {0}", player.TPlayer.inventory[player.TPlayer.selectedItem].name));
+						if (TimeLeft.ContainsKey(player.Name))
+						{
+							if (TimeLeft[player.Name] <= 0)
+							{
+								TimeLeft.Remove(player.Name);
+								TShock.Utils.Kick(player, string.Format("Holding banned item: {0}", player.TPlayer.inventory[player.TPlayer.selectedItem].name));
+							}
+							else
+							{
+								player.SendInfoMessage($"Take it off or you will be kicked. Time left: {TimeLeft[player.Name]}");
+								--TimeLeft[player.Name];
+							}
+						}
+						else
+						{
+							TimeLeft.Add(player.Name, MaxTimeLeft);
+						}
+					}
+					else if (TimeLeft.ContainsKey(player.Name))
+					{
+						TimeLeft.Remove(player.Name);
 					}
 				}
 			}

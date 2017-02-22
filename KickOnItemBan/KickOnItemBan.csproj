@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="OTAPI">
       <HintPath>..\lib\OTAPI.dll</HintPath>
     </Reference>
@@ -49,6 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
     <Compile Include="KickOnItemBan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
@@ -19,7 +16,7 @@ namespace KickOnItemBan
 
 		public override Version Version
 		{
-			get { return new Version(1, 1, 0); }
+			get { return new Version(1, 2, 0); }
 		}
 
 		public override string Author
@@ -37,9 +34,14 @@ namespace KickOnItemBan
 
 		}
 
+		private Config config;
+
 		public override void Initialize()
 		{
 			ServerApi.Hooks.GameUpdate.Register(this, OnUpdate);
+			Commands.ChatCommands.Add(new Command("koib.reload", ReloadCommand, "koib"));
+
+			config = Config.ReadConfig();
 		}
 
 		protected override void Dispose(bool disposing)
@@ -56,8 +58,6 @@ namespace KickOnItemBan
 		private DateTime LastCheck = DateTime.UtcNow;
 
 		private Dictionary<string, int> TimeLeft = new Dictionary<string, int>();
-
-		private int MaxTimeLeft = 10;
 
 		private void OnUpdate(EventArgs args)
 		{
@@ -85,13 +85,13 @@ namespace KickOnItemBan
 							}
 							else
 							{
-								player.SendInfoMessage($"Take it off or you will be kicked. Time left: {TimeLeft[player.Name]}");
+								player.SendInfoMessage(config.CountDownMessage, TimeLeft[player.Name]);
 								--TimeLeft[player.Name];
 							}
 						}
 						else
 						{
-							TimeLeft.Add(player.Name, MaxTimeLeft);
+							TimeLeft.Add(player.Name, config.MaxTimeLeft);
 						}
 					}
 					else if (TimeLeft.ContainsKey(player.Name))
@@ -100,6 +100,14 @@ namespace KickOnItemBan
 					}
 				}
 			}
+		}
+
+		private void ReloadCommand(CommandArgs args)
+		{
+			config = Config.ReadConfig();
+
+			TShock.Log.ConsoleInfo("MaxTimeLeft = " + config.MaxTimeLeft);
+			TShock.Log.ConsoleInfo("CountDownMessage = \"" + config.CountDownMessage + "\"");
 		}
 	}
 }
